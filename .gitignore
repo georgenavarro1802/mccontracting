@@ -1,8 +1,10 @@
 .idea/
 .idea/*
 
+/mccontracting/wsgi.py
+mccontracting/wsgi.py
+
 /mccontracting/settings.py
-/mccontracting/.settings.py.swp
 mccontracting/settings.py
 
 **/__pycache__/
