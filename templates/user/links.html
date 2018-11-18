@@ -1,0 +1,107 @@
+{% extends 'base_profile.html' %}
+
+{% load static %}
+
+{% block canvas_profile %}
+
+    <h3 class="mt-0 text-center">
+        Links
+    </h3>
+    <p class="text-muted font-14 text-center">
+        Add information about your social media links and websites.
+    </p>
+    <hr/>
+
+    <div class="form-field-container">
+
+        <form id="formLinks" role="form" action="" autocomplete="off">
+
+            <div class="form-group">
+                <input class="urlinput form-control lh-2" id="website" name="website" placeholder="Website (http(s)://..)" type="url" value="{{ myuser.website|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
+                <div class="controls ">
+                    <div class="input-group">
+                        <span class="input-group-addon">http://www.facebook.com/</span>
+                        <input class="textinput textInput form-control lh-2" id="facebook" maxlength="128" name="facebook" placeholder="Input your Facebook username (e.g. johnsmith)" type="text" value="{{ myuser.facebook|default_if_none:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="controls ">
+                    <div class="input-group">
+                        <span class="input-group-addon">http://www.linkedin.com/</span>
+                        <input class="textinput textInput form-control lh-2" id="linkedin" maxlength="128" name="linkedin" placeholder="Input your LinkedIn resource id (e.g. in/johnsmith)" type="text" value="{{ myuser.linkedin|default_if_none:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="controls ">
+                    <div class="input-group">
+                        <span class="input-group-addon">http://twitter.com/</span>
+                        <input class="textinput textInput form-control lh-2" id="twitter" maxlength="128" name="twitter" placeholder="Add your Twitter username (e.g. johnsmith)" type="text" value="{{ myuser.twitter|default_if_none:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="controls ">
+                    <div class="input-group">
+                        <span class="input-group-addon">http://www.youtube.com/</span>
+                        <input class="textinput textInput form-control lh-2" id="youtube" maxlength="128" name="youtube" placeholder="Input your Youtube username (e.g. johnsmith)" type="text" value="{{ myuser.youtube|default_if_none:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-success" id="btnLinks">
+                <i class="mdi mdi-check"></i> Save
+            </button>
+        </form>
+
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    <script>
+        $(function () {
+
+            $("#btnLinks").click(function () {
+                var form = $('#formLinks');
+
+                // get data
+                var data = form.serializeArray();
+
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'user_links' %}",
+                    data: data,
+                    success: function (response) {
+                        if (response.result === "ok") {
+                            swal({
+                                title: 'Good Job!',
+                                text: response.message,
+                                type: 'success'
+                            }).then(function () {
+                                location.reload();
+                            });
+                        }else{
+                            swal({
+                                title: 'Oops',
+                                text: response.message,
+                                type: "error"
+                            });
+                        }
+                    }
+                })
+            });
+
+        });
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block canvas %}
+
+    <div class="row">
+        <div class="col-6">
+            <h5>EMPLOYEES</h5>
+        </div>
+        <div class="col-6">
+            <button type="button" class="btn btn-dropbox waves-effect waves-light btn-animation" style="float: right" data-animation="zoomIn" data-toggle="modal" data-target="#employeeModal">
+                <i class="mdi mdi-plus"></i> New Employee
+            </button>
+        </div>
+    </div>
+
+    <div class="row m-t-10">
+        <div class="col-12">
+            <div class="card m-b-30">
+            <div class="card-body">
+
+                <table id="employee_table" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th style="width: 220px">Email</th>
+                        <th style="width: 120px">Phone</th>
+                        <th style="width: 40px">Gender</th>
+                        <th style="width: 40px"></th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for employee in employees %}
+                        <tr>
+                            <td>
+                                {{ employee.get_inverse_name }}
+                                {% if employee.is_supervisor %}
+                                    <br/><label class="badge badge-info">supervisor</label>
+                                {% endif %}
+                            </td>
+                            <td>{{ employee.user.email }}</td>
+                            <td>{{ employee.phone }}</td>
+                            <td class="text-center">
+                                {% if employee.gender == 1 %}F{% else %}M{% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a class="employeeEdit" eid="{{ employee.id }}" href="javascript:void(0);" role="button" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit">
+                                    <i class="mdi mdi-pencil"></i>
+                                </a>
+                                <a class="employeeDelete" eid="{{ employee.id }}" href="javascript:void(0);" role="button" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete">
+                                    <i class="mdi mdi-delete"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                No employees found in this company
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+    </div> <!-- end row -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="employeeModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Employee</h5>
+                    <button type="button" class="close myclose" data-dismiss="modal" aria-label="Close">
+                        <i class="mdi mdi-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="employeeForm" action="" autocomplete="off">
+                        <input type="hidden" id="formAction" name="action" value="add"/>
+                        <input type="hidden" id="eid" name="eid" value=""/>
+
+                        <div class="form-group row">
+                            <label for="first_name" class="col-md-3 col-form-label">Firstname</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control capitalize" id="first_name" name="first_name"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="last_name" class="col-md-3 col-form-label">Lastname</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control capitalize" id="last_name" name="last_name"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="email" class="col-md-3 col-form-label">Email</label>
+                            <div class="col-md-9">
+                                <input type="email" class="form-control lowercase" id="email" name="email"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="phone" class="col-md-3 col-form-label">Phone</label>
+                            <div class="col-md-9">
+                                <input type="text" id="phone" name="phone" data-mask="(999) 999-9999" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-md-3 my-1 control-label">Gender</label>
+                            <div class="col-md-9">
+                                <div class="form-check-inline my-1">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="gender_1" name="genders" class="custom-control-input" value="1">
+                                        <label class="custom-control-label" for="gender_1">Female</label>
+                                    </div>
+                                </div>
+                                <div class="form-check-inline my-1">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="gender_2" name="genders" class="custom-control-input" value="2">
+                                        <label class="custom-control-label" for="gender_2">Male</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-md-3 my-1 control-label">Supervisor</label>
+                            <div class="col-md-9">
+                                <div class="form-check-inline my-1">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="supervisor_1" name="supervisors" class="custom-control-input" value="1">
+                                        <label class="custom-control-label" for="supervisor_1">SI</label>
+                                    </div>
+                                </div>
+                                <div class="form-check-inline my-1">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="supervisor_2" name="supervisors" class="custom-control-input" value="2">
+                                        <label class="custom-control-label" for="supervisor_2">NO</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-dropbox waves-effect waves-light" id="btnEmployeeAdd">
+                                <i class="mdi mdi-check"></i> Confirm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    <script type="text/javascript">
+        $(function() {
+
+            // avoid js error when there are not elements in the table
+            {% if employees %}
+                $('#employee_table').DataTable();
+            {% endif %}
+
+            $("#btnEmployeeAdd").click(function () {
+                var form = $('#employeeForm');
+
+                // get data
+                var data = form.serializeArray();
+
+                var first_name = $("#first_name").val();
+                var last_name = $("#last_name").val();
+                var email = $("#email").val();
+                var phone = $("#phone").val();
+                var error = false;
+
+                if (email && !isEmail(email)) {error = "Please enter a valid email address";}
+                if(!email && !phone){error = "Please enter an email address and phone number";}
+                if(!last_name){error = "Please enter a last name";}
+                if(!first_name){error = "Please enter a first name";}
+
+                if(error){
+                    alert(error);
+                }else{
+                    $.ajax({
+                        method: "POST",
+                        url: "{% url 'employees' %}",
+                        data: data,
+                        success: function (response) {
+                            if (response.result === "ok") {
+                                $("#cemployeeModal").hide();
+                                swal({
+                                    title: 'Good Job!',
+                                    text: response.message,
+                                    type: 'success'
+                                }).then(function () {
+                                    location.reload();
+                                });
+
+                            }else{
+                                swal({
+                                    title: 'Oops',
+                                    text: response.message,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    })
+                }
+            });
+
+            $(".employeeEdit").click(function () {
+                var eid = $(this).attr('eid');
+                var employee_first_name = $("#first_name");
+                var employee_last_name = $("#last_name");
+                var employee_email = $("#email");
+                var employee_phone = $("#phone");
+                var employeeModal = $('#employeeModal');
+
+                if (eid){
+                    $.ajax({
+                        method: "GET",
+                        url: "{% url 'employees' %}",
+                        data: {'action': 'get_employee_data', 'eid': eid},
+                        success: function (response) {
+                            employee_first_name.val(response.first_name);
+                            employee_last_name.val(response.last_name);
+                            employee_email.val(response.email);
+                            employee_phone.val(response.phone);
+                            $("#gender_"+response.gender).attr('checked', true);
+                            $("#supervisor_"+response.supervisor).attr('checked', true);
+
+                            $("#eid").val(eid);
+                            $("#formAction").val('edit');
+                            employeeModal.modal("show");
+                        }
+                    })
+                }
+            });
+
+            $(".employeeDelete").click(function () {
+                var eid = $(this).attr('eid');
+
+                if (eid){
+                    swal({
+                        title: 'Delete Employee',
+                        text: "Are you sure you want to delete this employee?. <br/> You won't be able to revert this!",
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonClass: 'btn btn-danger',
+                        cancelButtonClass: 'btn btn-default m-l-10',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then(function () {
+
+                        $.ajax({
+                            method: "POST",
+                            url: "{% url 'employees' %}",
+                            data: {'action': 'delete', 'eid': eid},
+                            success: function (response) {
+                                swal({
+                                    title: 'Employee Deleted!',
+                                    text: response.message,
+                                    type: 'success'
+                                }).then(function () {
+                                    location.reload();
+                                });
+                            }
+                        });
+
+                    });
+                }
+            });
+
+        });
+    </script>
+
+{% endblock %}

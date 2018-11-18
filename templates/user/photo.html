@@ -1,0 +1,29 @@
+{% extends 'base_profile.html' %}
+
+{% load static %}
+
+{% block canvas_profile %}
+
+    <h3 class="mt-0 text-center">
+        Photo
+    </h3>
+    <p class="text-muted font-14 text-center">
+        Add a nice photo of yourself for your profile.
+    </p>
+    <hr/>
+
+    <div class="form-field-container">
+
+        <form id="formAvatar" role="form" action="{% url 'user_photo' %}" method="POST" autocomplete="off" enctype="multipart/form-data">
+
+            <input type="file" name="avatar" id="avatar" class="dropify" data-default-file="{{ myuser.download_avatar }}" />
+
+            <button type="submit" class="btn btn-success mt-3" id="btnProfile">
+                <i class="mdi mdi-check"></i> Save
+            </button>
+
+        </form>
+
+    </div>
+
+{% endblock %}

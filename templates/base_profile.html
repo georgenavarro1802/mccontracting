@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block heading %}
+
+    <link href="{% static 'plugins/dropify/css/dropify.min.css' %}" rel="stylesheet">
+
+    <link href="{% static 'css/pricing.css' %}" rel="stylesheet">
+
+{% endblock %}
+
+
+{% block canvas %}
+
+    <div class="row mt-4">
+
+        <div class="col-md-3 col-xl-3">
+            <div class="card m-b-30">
+                <div class="card-body">
+
+                    <div class="text-center">
+                        <img src="{{ myuser.download_avatar }}" alt="" class="rounded-circle img-thumbnail w-75">
+                        <h4 class="font-18">{{ myuser.complete_name }}</h4>
+                        <a href="" class="text-muted font-12">{{ myuser.user.email }}</a>
+
+                        <ul class="list-unstyled list-inline mb-0 mt-3">
+                            <li class="list-inline-item">
+                                <a href="#">
+                                    <i class="ti-facebook text-info"></i>
+                                </a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a href="#">
+                                    <i class="ti-linkedin text-info"></i>
+                                </a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a href="#">
+                                    <i class="ti-twitter-alt text-info"></i>
+                                </a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a href="#">
+                                    <i class="ti-youtube text-info"></i>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <hr/>
+
+                        <ul class="list-unstyled mb-0 mt-3 text-left">
+
+                            <li class="settings_menu">
+                                <a href="{% url 'user_profile' %}" class="{% if is_user_profile %}text-danger font-17{% endif %}">
+                                    Profile
+                                </a>
+                            </li>
+
+                            <li class="settings_menu">
+                                <a href="{% url 'user_photo' %}" class="{% if is_user_photo %}text-danger font-17{% endif %}">
+                                    Photo
+                                </a>
+                            </li>
+
+                            <li class="settings_menu">
+                                <a href="{% url 'user_links' %}" class="{% if is_user_links %}text-danger font-17{% endif %}">
+                                    Links
+                                </a>
+                            </li>
+
+                            <li class="settings_menu">
+                                <a href="{% url 'user_account' %}" class="{% if is_user_account %}text-danger font-17{% endif %}">
+                                    Account
+                                </a>
+                            </li>
+
+                            <li class="settings_menu">
+                                <a href="{% url 'user_plans' %}" class="{% if is_user_plans %}text-danger font-17{% endif %}">
+                                    Plans
+                                </a>
+                            </li>
+
+                            <li class="settings_menu">
+                                <a href="{% url 'user_billing' %}" class="{% if is_user_billing %}text-danger font-17{% endif %}">
+                                    Billing
+                                </a>
+                            </li>
+
+{#                            <li class="settings_menu">#}
+{#                                <a href="{% url 'user_notifications' %}" class="{% if is_user_notifications %}text-danger font-17{% endif %}">#}
+{#                                    Notifications#}
+{#                                </a>#}
+{#                            </li>#}
+
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9 col-xl-9">
+            <div class="card bg-white m-b-30">
+                <div class="card-body">
+                    {% block canvas_profile %}{% endblock %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    <script src="{% static 'plugins/dropify/js/dropify.min.js' %}"></script>
+
+    <script>
+        $(document).ready(function(){
+
+            // Basic
+            $('.dropify').dropify();
+
+            // Translated
+            $('.dropify-fr').dropify({
+                messages: {
+                    default: 'Glissez-déposez un fichier ici ou cliquez',
+                    replace: 'Glissez-déposez un fichier ou cliquez pour remplacer',
+                    remove:  'Supprimer',
+                    error:   'Désolé, le fichier trop volumineux'
+                }
+            });
+
+            // Used events
+            var drEvent = $('#input-file-events').dropify();
+
+            drEvent.on('dropify.beforeClear', function(event, element){
+                return confirm("Do you really want to delete \"" + element.file.name + "\" ?");
+            });
+
+            drEvent.on('dropify.afterClear', function(event, element){
+                alert('File deleted');
+            });
+
+            drEvent.on('dropify.errors', function(event, element){
+                console.log('Has Errors');
+            });
+
+            var drDestroy = $('#input-file-to-destroy').dropify();
+            drDestroy = drDestroy.data('dropify');
+            $('#toggleDropify').on('click', function(e){
+                e.preventDefault();
+                if (drDestroy.isDropified()) {
+                    drDestroy.destroy();
+                } else {
+                    drDestroy.init();
+                }
+            })
+        });
+    </script>
+
+{% endblock %}

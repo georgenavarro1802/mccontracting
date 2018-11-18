@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block canvas %}
+
+    <div class="row">
+        <div class="col-12">
+            <button type="button" class="btn btn-dropbox waves-effect waves-light btn-animation" style="float: right" data-animation="zoomIn" data-toggle="modal" data-target="#workModal">
+                <i class="mdi mdi-plus"></i> New Work
+            </button>
+        </div>
+    </div>
+
+    <div class="row m-t-10">
+        <div class="col-12">
+            <div class="card m-b-10">
+                <div class="card-body">
+                    <table id="works_table" class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th style="width: 30px">WID</th>
+                            <th>Project / Tasks</th>
+                            <th style="width: 100px">Customer</th>
+                            <th style="width: 100px">Supervisor</th>
+                            <th style="width: 100px">Address</th>
+                            <th style="width: 30px">Created</th>
+                            <th style="width: 30px"></th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for work in works %}
+                            {% with percentage_tasks_completed=work.get_percentage_completed|floatformat:0 total_tasks=work.get_number_tasks|floatformat:0 completed_tasks=work.get_number_tasks|floatformat:0 %}
+                            <tr>
+                                <td>
+                                    {{ work.repr_id }}
+                                    {% if work.is_completed %}
+                                        <label class="badge badge-success">Completed</label>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ work.project.name }}
+                                    <hr/>
+                                    {% if total_tasks > 0 %}
+                                        <div class="progress font-10">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ percentage_tasks_completed }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ percentage_tasks_completed }}%">
+                                                {{ percentage_tasks_completed }}%
+                                            </div>
+                                        </div>
+                                        <span class="font-10">
+                                            {{ completed_tasks }} completed task of {{ total_tasks }}
+                                        </span>
+                                    {% else %}
+                                        <div>
+                                            <label class="badge badge-default font-12"> 0 Task</label>
+                                            <a href="{% url 'tasks' %}?w={{ work.id }}" class="pull-right font-11" data-toggle="tooltip" data-placement="top" title="Add Task">
+                                                <i class="mdi mdi-plus"></i> Add Task
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ work.project.customer.get_inverse_name }}</td>
+                                <td>{{ work.supervisor.get_inverse_name }}</td>
+                                <td>{{ work.address }}</td>
+                                <td>{{ work.created_at|date:"Y-m-d H:i" }}</td>
+                                <td class="text-center">
+                                    <a class="workEdit" eid="{{ work.id }}" href="javascript:void(0);" role="button" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit">
+                                        <i class="mdi mdi-pencil"></i>
+                                    </a>
+                                    <a class="workDelete" eid="{{ work.id }}" href="javascript:void(0);" role="button" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete">
+                                        <i class="mdi mdi-delete"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endwith %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="10">
+                                    No works found in this company
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="workModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Work</h5>
+                    <button type="button" class="close myclose" data-dismiss="modal" aria-label="Close">
+                        <i class="mdi mdi-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="workForm" action="" autocomplete="off">
+                        <input type="hidden" id="formAction" name="action" value="add"/>
+                        <input type="hidden" id="eid" name="eid" value=""/>
+
+                        <div class="form-group row">
+                            <label for="sel_project" class="col-md-3 col-form-label">Project</label>
+                            <div class="col-md-9">
+                                <select class="select2 form-control mb-3 custom-select" name="sel_project" id="sel_project">
+                                    <option value="0"></option>
+                                    {% for project in projects %}
+                                        <option value="{{ project.id }}">{{ project.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="sel_supervisor" class="col-md-3 col-form-label">Supervisor</label>
+                            <div class="col-md-9">
+                                <select class="select2 form-control mb-3 custom-select" name="sel_supervisor" id="sel_supervisor">
+                                    <option value="0"></option>
+                                    {% for supervisor in supervisors %}
+                                        <option value="{{ supervisor.id }}">{{ supervisor }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="address" class="col-md-3 col-form-label">Address</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" id="address" name="address"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="notes" class="col-md-3 col-form-label">Notes</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" id="notes" name="notes"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-dropbox waves-effect waves-light" id="btnWorkAdd">
+                                <i class="mdi mdi-check"></i> Confirm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    <script type="text/javascript">
+        $(function() {
+
+            // avoid js error when there are not elements in the table
+            {% if works %}
+                $('#works_table').DataTable();
+            {% endif %}
+
+            $("#btnWorkAdd").click(function () {
+                var form = $('#workForm');
+
+                // get data
+                var data = form.serializeArray();
+
+                var project = $("#sel_project").val();
+                var supervisor = $("#sel_supervisor").val();
+                var address = $("#address").val();
+                var error = false;
+
+                if(!address){error = "Please enter a work address";}
+                if(!project){error = "Please select a project";}
+                if(!supervisor){error = "Please select a supervisor";}
+
+                if(error){
+                    alert(error);
+                }else{
+                    $.ajax({
+                        method: "POST",
+                        url: "{% url 'works' %}",
+                        data: data,
+                        success: function (response) {
+                            if (response.result === "ok") {
+                                $("#workModal").hide();
+                                swal({
+                                    title: 'Good Job!',
+                                    text: response.message,
+                                    type: 'success'
+                                }).then(function () {
+                                    location.reload();
+                                });
+
+                            }else{
+                                swal({
+                                    title: 'Oops',
+                                    text: response.message,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    })
+                }
+            });
+
+            $(".workEdit").click(function () {
+                var eid = $(this).attr('eid');
+                var address = $("#address");
+                var project = $("#sel_project");
+                var supervisor = $("#sel_supervisor");
+                var notes = $("#notes");
+                var workModal = $('#workModal');
+
+                if (eid){
+                    $.ajax({
+                        method: "GET",
+                        url: "{% url 'works' %}",
+                        data: {'action': 'get_work_data', 'eid': eid},
+                        success: function (response) {
+                            address.val(response.address);
+                            notes.val(response.notes);
+                            project.val(response.project_id).trigger('change');
+                            supervisor.val(response.supervisor_id).trigger('change');
+
+                            $("#eid").val(eid);
+                            $("#formAction").val('edit');
+                            workModal.modal("show");
+                        }
+                    })
+                }
+            });
+
+            $(".workDelete").click(function () {
+                var eid = $(this).attr('eid');
+
+                if (eid){
+                    swal({
+                        title: 'Delete Work Order',
+                        text: "Are you sure you want to delete this work order?. <br/> You won't be able to revert this!",
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonClass: 'btn btn-danger',
+                        cancelButtonClass: 'btn btn-default m-l-10',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then(function () {
+
+                        $.ajax({
+                            method: "POST",
+                            url: "{% url 'works' %}",
+                            data: {'action': 'delete', 'eid': eid},
+                            success: function (response) {
+                                swal({
+                                    title: 'Work Deleted!',
+                                    text: response.message,
+                                    type: 'success'
+                                }).then(function () {
+                                    location.reload();
+                                });
+                            }
+                        });
+
+                    });
+                }
+            });
+
+        });
+    </script>
+
+{% endblock %}

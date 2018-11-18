@@ -1,0 +1,648 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block heading %}
+    <style>
+        .dtp_modal-content{
+            z-index: 9999;
+        }
+    </style>
+{% endblock %}
+
+{% block canvas %}
+
+    <div class="row m-t-20">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        Work Order #{{ work.repr_id }}
+                        <span class="font-16 pull-right">
+                            {% if work.is_completed %}
+                                <label class="badge badge-success">Completed</label>
+                            {% endif %}
+                        </span>
+                        <br/>
+                        <span class="font-12" style="font-weight: normal">
+                            created at {{ work.created_at|date:'Y-m-d' }} ({{ work.created_at|date:'H:i' }})
+                        </span>
+                    </h5>
+
+                    {% with percentage_tasks_completed=work.get_percentage_completed|floatformat:0 total_tasks=work.get_number_tasks|floatformat:0 completed_tasks=work.get_number_tasks_completed|floatformat:0 %}
+                        <hr/>
+                        <h6 class="card-title">Tasks Progress</h6>
+                        <div class="progress font-10">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ percentage_tasks_completed }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ percentage_tasks_completed }}%">
+                                {% if percentage_tasks_completed > 0 %}{{ percentage_tasks_completed }}%{% endif %}
+                            </div>
+                        </div>
+                        <span class="font-10">
+                            {{ completed_tasks }} completed task of {{ total_tasks }}
+                        </span>
+                    {% endwith %}
+
+                    <button type="button" class="btn btn-dropbox waves-effect waves-light btn-animation m-t-10" style="float: right" data-animation="zoomIn" data-toggle="modal" data-target="#taskModal">
+                        <i class="mdi mdi-plus"></i> Add Task
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+
+                    <h6 class="card-title m-b-15">
+                        Project
+                        <span class="card-text pull-right font-14" style="font-weight: normal">{{ work.project.name }}</span>
+                    </h6>
+
+                    <h6 class="card-title m-b-15">
+                        Customer
+                        <span class="card-text pull-right font-14" style="font-weight: normal">{{ work.project.customer.get_inverse_name }}</span>
+                    </h6>
+
+                    <h6 class="card-title m-b-20">
+                        Supervisor
+                        <span class="card-text pull-right font-14" style="font-weight: normal">{{ work.supervisor.get_inverse_name }}</span>
+                    </h6>
+
+                    <h6 class="card-title m-b-15">
+                        Address
+                        <span class="card-text pull-right font-14" style="font-weight: normal">{{ work.address }}</span>
+                    </h6>
+
+                    <h6 class="card-title m-b-15">
+                        Notes
+                        <span class="card-text pull-right font-14" style="font-weight: normal">{{ work.notes }}</span>
+                    </h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="row m-t-20">
+        {% for task in tasks %}
+            <div class="col-3">
+                <div class="card mb-3">
+                    <div class="card-header {% if task.is_new %}bg-light{% endif %} {% if task.is_progress %}text-white bg-info{% endif %} {% if task.is_completed %}text-white bg-success{% endif %}">
+                        <h6>
+                            Task #{{ task.repr_id }}
+                            <br/>
+                            <span class="font-12" style="font-weight: normal">
+                                created at {{ task.created_at|date:'Y-m-d' }} ({{ task.created_at|date:'H:i' }})
+                            </span>
+                        </h6>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row" style="margin-top: -17px">
+                            <div class="col-6">
+                                <h6 class="card-title m-b-15 font-14">Type</h6>
+                                <p class="card-text font-12" style="font-weight: normal; margin-top: -0.9em">{{ task.type.name }}</p>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="card-title m-b-15 font-14">Assigned To</h6>
+                                <p class="card-text font-12" style="font-weight: normal; margin-top: -0.9em">{{ task.assigned_to.get_inverse_name }}</p>
+                            </div>
+                        </div>
+                        <div class="row m-t-10">
+                            <div class="col-6">
+                                <h6 class="card-title m-b-15 font-14">Address</h6>
+                                <p class="card-text font-12" style="font-weight: normal; margin-top: -0.9em">{{ task.address }}</p>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="card-title m-b-15 font-14">DateTime</h6>
+                                <p class="card-text font-12" style="font-weight: normal; margin-top: -0.9em">
+                                    {{ task.date_time|date:'Y-m-d' }} ({{ task.created_at|date:'H:i' }})
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr/>
+                        <h6 class="card-title m-b-15">
+                            Notes
+                            <br/><span class="card-text font-12" style="font-weight: normal; margin-top: -0.9em">{{ task.notes }}</span>
+                        </h6>
+                    </div>
+
+                    <div class="card-footer">
+                        {% if not task.is_progress or task.is_completed %}
+                            <span class="pull-left">
+                                <a class="taskDetails btn btn-sm" eid="{{ task.id }}" repr_id="{{ task.repr_id }}" lat="{{ task.register_latitude }}" lng="{{ task.register_longitude }}" href="javascript:void(0);">
+                                    <i class="mdi mdi-details"></i> Details
+                                </a>
+                            </span>
+                        {% endif %}
+                        {% if task.is_new %}
+                            <span class="pull-right">
+                                <a class="taskEdit btn btn-info btn-sm" eid="{{ task.id }}" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit">
+                                    <i class="mdi mdi-pencil"></i>
+                                </a>
+                                <a class="taskDelete btn btn-danger btn-sm" eid="{{ task.id }}" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete">
+                                    <i class="mdi mdi-delete"></i>
+                                </a>
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center col-12 alert alert-info">
+                <h6>This Work Order does not have any Tasks</h6>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="taskModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Task
+                        <p class="m-t-5 font-12">Work: {{ work.repr_id }}</p>
+                    </h5>
+                    <button type="button" class="close myclose" data-dismiss="modal" aria-label="Close">
+                        <i class="mdi mdi-close"></i>
+                    </button>
+
+                </div>
+                <div class="modal-body">
+                    <form id="taskForm" action="" autocomplete="off">
+                        <input type="hidden" id="formAction" name="action" value="add"/>
+                        <input type="hidden" id="eid" name="eid" value=""/>
+                        <input type="hidden" id="wid" name="wid" value="{{ work.id }}"/>
+
+                        <div class="form-group row">
+                            <label for="sel_type" class="col-md-3 col-form-label">Type</label>
+                            <div class="col-md-9">
+                                <select class="select2 form-control mb-3 custom-select" name="sel_type" id="sel_type">
+                                    <option value="0"></option>
+                                    {% for type in types %}
+                                        <option value="{{ type.id }}">{{ type.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="sel_employee" class="col-md-3 col-form-label">Assigned To</label>
+                            <div class="col-md-9">
+                                <select class="select2 form-control mb-3 custom-select" name="sel_employee" id="sel_employee">
+                                    <option value="0"></option>
+                                    {% for employee in employees %}
+                                        <option value="{{ employee.id }}">{{ employee.get_inverse_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="address" class="col-md-3 col-form-label">Address</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" id="address" name="address"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="date_time" class="col-md-3 col-form-label">DateTime</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" id="date_time" name="date_time">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="notes" class="col-md-3 col-form-label">Notes</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" id="notes" name="notes"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-dropbox waves-effect waves-light" id="btnTaskAdd">
+                                <i class="mdi mdi-check"></i> Confirm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="taskDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Task #<span id="task_repr_id"></span>
+                    </h5>
+                    <button type="button" class="close myclose" data-dismiss="modal" aria-label="Close">
+                        <i class="mdi mdi-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="tid" name="tid" value=""/>
+
+                    <!-- Registration Info -->
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="card">
+                                <h6 class="card-header">Registration</h6>
+                                <div class="card-body">
+                                    <h6 class="card-title m-b-15 font-14">
+                                        DateTime
+                                        <span class="card-text pull-right font-14" style="font-weight: normal">
+        {#                                    {{ task.register_datetime|date:'Y-m-d' }} ({{ task.register_datetime|date:'H:i' }})#}
+                                            2018-11-14 (14:30)
+                                        </span>
+                                    </h6>
+
+                                    <h6 class="card-title m-b-15 font-14">
+                                        Latitude
+                                        <span class="card-text pull-right font-14" style="font-weight: normal">
+        {#                                    {{ task.register_latitude }}#}
+                                            26.319294
+                                        </span>
+                                    </h6>
+
+                                    <h6 class="card-title m-b-15 font-14">
+                                        Longitude
+                                        <span class="card-text pull-right font-14" style="font-weight: normal">
+        {#                                    {{ task.register_longitude }}#}
+                                            -80.118348
+                                        </span>
+                                    </h6>
+
+                                    <h6 class="card-title m-b-15 font-14">
+                                        Location
+                                        <span class="card-text pull-right font-14" style="font-weight: normal">
+        {#                                    {{ task.register_longitude }}#}
+                                            <a href="https://maps.google.com/?q=38.6531004,-90.243462&ll=38.6531004,-90.243462&z=17" target="_blank" data-toggle="tooltip" data-placement="top" title="" data-original-title="Click to show location in Google Map">
+                                                <img src="{% static 'images/map.png' %}" alt="map" width="24" height="24"/>
+                                            </a>
+                                        </span>
+                                    </h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="card">
+                                <h6 class="card-header">Customer Feedback</h6>
+                                <div class="card-body">
+                                    <h6 class="card-title m-b-15 font-14">
+                                        Evaluation
+                                        <span class="card-text pull-right font-12" style="font-weight: normal">
+                                            <input type="hidden" class="rating-tooltip" data-filled="mdi mdi-star font-20 text-warning" data-empty="mdi mdi-star-outline font-20 text-muted"/>
+                                        </span>
+                                    </h6>
+                                    <h6 class="card-title m-b-15 font-14">
+                                        Signature
+                                        <span class="card-text pull-right font-12" style="font-weight: normal">
+                                            <img src="{% static 'images/signature.png' %}" alt="signature" width="100" height="95"/>
+                                        </span>
+                                    </h6>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Before and After Pictures -->
+                    <div class="row text-center">
+                        <div class="col-12 ">
+                            <h6>Before Pictures</h6>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3 thumb">
+                            <a class="thumbnail" href="#" data-image-id="" data-toggle="modal" data-title="" data-image="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" data-target="#image-gallery">
+                                <img class="img-thumbnail" src="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Another alt text">
+                            </a>
+                        </div>
+                        <div class="col-3 thumb">
+                            <a class="thumbnail" href="#" data-image-id="" data-toggle="modal" data-title="" data-image="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" data-target="#image-gallery">
+                                <img class="img-thumbnail" src="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Another alt text">
+                            </a>
+                        </div>
+                        <div class="col-3 thumb">
+                            <a class="thumbnail" href="#" data-image-id="" data-toggle="modal" data-title="" data-image="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" data-target="#image-gallery">
+                                <img class="img-thumbnail" src="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Another alt text">
+                            </a>
+                        </div>
+                        <div class="col-3 thumb">
+                            <a class="thumbnail" href="#" data-image-id="" data-toggle="modal" data-title="" data-image="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" data-target="#image-gallery">
+                                <img class="img-thumbnail" src="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Another alt text">
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row text-center">
+                        <div class="col-12 ">
+                            <h6>After Pictures</h6>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3 thumb">
+                            <a class="thumbnail" href="#" data-image-id="" data-toggle="modal" data-title="" data-image="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" data-target="#image-gallery">
+                                <img class="img-thumbnail" src="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Another alt text">
+                            </a>
+                        </div>
+                        <div class="col-3 thumb">
+                            <a class="thumbnail" href="#" data-image-id="" data-toggle="modal" data-title="" data-image="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" data-target="#image-gallery">
+                                <img class="img-thumbnail" src="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Another alt text">
+                            </a>
+                        </div>
+                        <div class="col-3 thumb">
+                            <a class="thumbnail" href="#" data-image-id="" data-toggle="modal" data-title="" data-image="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" data-target="#image-gallery">
+                                <img class="img-thumbnail" src="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Another alt text">
+                            </a>
+                        </div>
+                        <div class="col-3 thumb">
+                            <a class="thumbnail" href="#" data-image-id="" data-toggle="modal" data-title="" data-image="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" data-target="#image-gallery">
+                                <img class="img-thumbnail" src="https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Another alt text">
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="image-gallery" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="image-gallery-title"></h4>
+                    <button type="button" class="close myclose" data-dismiss="modal" aria-label="Close">
+                        <i class="mdi mdi-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img id="image-gallery-image" class="img-responsive col-12" src="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-info float-left" id="show-previous-image">
+                        <i class="mdi mdi-chevron-left"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-sm btn-info float-right" id="show-next-image" >
+                        <i class="mdi mdi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    <!-- Map -->
+    <script src="//maps.googleapis.com/maps/api/js"></script>
+
+    <script type="text/javascript">
+
+        let modalId = $('#image-gallery');
+
+        $(function() {
+
+            $('#date_time').datetimepicker();
+
+            $("#btnTaskAdd").click(function () {
+                var form = $('#taskForm');
+
+                // get data
+                var data = form.serializeArray();
+
+                var type = $("#sel_type").val();
+                var employee = $("#sel_employee").val();
+                var address = $("#address").val();
+                var date_time = $("#date_time").val();
+                var error = false;
+
+                if(!type){error = "Please select a work type";}
+                if(!employee){error = "Please select a task responsable employee";}
+                if(!address){error = "Please enter a task address";}
+                if(!date_time){error = "Please select a date and time";}
+
+                if(error){
+                    alert(error);
+                }else{
+                    $.ajax({
+                        method: "POST",
+                        url: "{% url 'tasks' %}",
+                        data: data,
+                        success: function (response) {
+                            if (response.result === "ok") {
+                                $("#taskModal").hide();
+                                swal({
+                                    title: 'Good Job!',
+                                    text: response.message,
+                                    type: 'success'
+                                }).then(function () {
+                                    location.reload();
+                                });
+
+                            }else{
+                                swal({
+                                    title: 'Oops',
+                                    text: response.message,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    })
+                }
+            });
+
+            $(".taskEdit").click(function () {
+                var eid = $(this).attr('eid');
+                var type = $("#sel_type");
+                var employee = $("#sel_employee");
+                var address = $("#address");
+                var date_time = $("#date_time");
+                var notes = $("#notes");
+                var taskModal = $('#taskModal');
+
+                if (eid){
+                    $.ajax({
+                        method: "GET",
+                        url: "{% url 'tasks' %}",
+                        data: {'action': 'get_task_data', 'eid': eid},
+                        success: function (response) {
+                            address.val(response.address);
+                            date_time.val(response.date_time);
+                            notes.val(response.notes);
+                            type.val(response.type_id).trigger('change');
+                            employee.val(response.employee_id).trigger('change');
+
+                            $("#eid").val(eid);
+                            $("#formAction").val('edit');
+                            taskModal.modal("show");
+                        }
+                    })
+                }
+            });
+
+            $(".taskDelete").click(function () {
+                var eid = $(this).attr('eid');
+
+                if (eid){
+                    swal({
+                        title: 'Delete Task',
+                        text: "Are you sure you want to delete this task?. <br/> You won't be able to revert this!",
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonClass: 'btn btn-danger',
+                        cancelButtonClass: 'btn btn-default m-l-10',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then(function () {
+
+                        $.ajax({
+                            method: "POST",
+                            url: "{% url 'tasks' %}",
+                            data: {'action': 'delete', 'eid': eid},
+                            success: function (response) {
+                                swal({
+                                    title: 'Task Deleted!',
+                                    text: response.message,
+                                    type: 'success'
+                                }).then(function () {
+                                    location.reload();
+                                });
+                            }
+                        });
+
+                    });
+                }
+            });
+
+
+            $(".taskDetails").click(function () {
+                var eid = $(this).attr('eid');
+                var lat = $(this).attr('lat');
+                var lng = $(this).attr('lng');
+                var span_task_repr_id = $('#task_repr_id');
+                var taskDetailModal = $('#taskDetailModal');
+
+                if (eid){
+
+                    $.ajax({
+                        method: "GET",
+                        url: "{% url 'tasks' %}",
+                        data: {'action': 'get_task_data', 'eid': eid, 'detail': 'true'},
+                        success: function (response) {
+
+                            {#address.val(response.address);#}
+                            {#date_time.val(response.date_time);#}
+                            {#notes.val(response.notes);#}
+                            {#type.val(response.type_id).trigger('change');#}
+                            {#employee.val(response.employee_id).trigger('change');#}
+
+                            span_task_repr_id.html(response.repr_id);
+                            $('#tid').val(eid);
+
+                            taskDetailModal.modal("show");
+
+                        }
+                    })
+                }
+
+            });
+
+            // Image Gallery inside modal
+            loadGallery(true, 'a.thumbnail');
+
+            //This function disables buttons when needed
+            function disableButtons(counter_max, counter_current) {
+                $('#show-previous-image, #show-next-image')
+                    .show();
+                if (counter_max === counter_current) {
+                    $('#show-next-image')
+                        .hide();
+                } else if (counter_current === 1) {
+                    $('#show-previous-image')
+                        .hide();
+                }
+            }
+
+            /**
+             * @param setIDs        Sets IDs when DOM is loaded. If using a PHP counter, set to false.
+             * @param setClickAttr  Sets the attribute for the click handler.
+             */
+
+            function loadGallery(setIDs, setClickAttr) {
+                let current_image,
+                    selector,
+                    counter = 0;
+
+                $('#show-next-image, #show-previous-image')
+                    .click(function () {
+                        if ($(this)
+                            .attr('id') === 'show-previous-image') {
+                            current_image--;
+                        } else {
+                            current_image++;
+                        }
+
+                        selector = $('[data-image-id="' + current_image + '"]');
+                        updateGallery(selector);
+                    });
+
+                function updateGallery(selector) {
+                    let $sel = selector;
+                    current_image = $sel.data('image-id');
+                    $('#image-gallery-title')
+                        .text($sel.data('title'));
+                    $('#image-gallery-image')
+                        .attr('src', $sel.data('image'));
+                    disableButtons(counter, $sel.data('image-id'));
+                }
+
+                if (setIDs === true) {
+                    $('[data-image-id]')
+                        .each(function () {
+                            counter++;
+                            $(this)
+                                .attr('data-image-id', counter);
+                        });
+                }
+                $(setClickAttr)
+                    .on('click', function () {
+                        updateGallery($(this));
+                    });
+            }
+
+        });
+
+        // build key actions
+        $(document).keydown(function (e) {
+            switch (e.which) {
+                case 37: // left
+                    if ((modalId.data('bs.modal') || {})._isShown && $('#show-previous-image').is(":visible")) {
+                        $('#show-previous-image')
+                            .click();
+                    }
+                    break;
+
+                case 39: // right
+                    if ((modalId.data('bs.modal') || {})._isShown && $('#show-next-image').is(":visible")) {
+                        $('#show-next-image')
+                            .click();
+                    }
+                    break;
+
+                default:
+                    return; // exit this handler for other keys
+            }
+            e.preventDefault(); // prevent the default action (scroll / move caret)
+        });
+
+    </script>
+
+{% endblock %}

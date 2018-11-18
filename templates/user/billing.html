@@ -1,0 +1,146 @@
+{% extends 'base_profile.html' %}
+
+{% load static %}
+
+{% block canvas_profile %}
+
+    <h3 class="mt-4 text-center">
+        Billing
+    </h3>
+    <p class="text-muted font-14 text-center">
+        Payment activity and credit cards information
+    </p>
+
+    <hr/>
+
+    <div id="tabs" class="mt-5">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs nav-justified" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#tab_creditcards" role="tab">Credit Cards</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tab_activity" role="tab">Payment Activity</a>
+            </li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+
+            <!-- Credit Cards -->
+            <div class="tab-pane active" id="tab_creditcards" role="tabpanel">
+                <table class="table">
+                    <tbody>
+                    {% for cc in myuser.get_my_credit_cards %}
+                        <tr>
+                            <td style="width: 3%">
+                                <img src="{% if cc.type == 1 %}{% static 'images/visa.png' %}{% elif cc.type == 2 %}{% static 'images/mastercard.png' %}{% else %}{% static 'images/cc_amex.png' %}{% endif %}" height="60px" width="60px"/>
+                            </td>
+                            <td style="width: 30%; text-align: left">
+                                **** **** **** {{ cc.last4 }} | EXP: {{ cc.month }}/{{ cc.year }}
+                            </td>
+                            <td class="text-right">
+    {#                            <button type="button" class="btn btn-warning waves-effect waves-light" data-toggle="tooltip" data-placement="top" title="" data-original-title="Make default">#}
+    {#                                <i class="mdi mdi-credit-card"></i>#}
+    {#                            </button>#}
+                                <button type="button" ccid="{{ cc.id }}" class="btn btn-info waves-effect waves-light ml-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Edit">
+                                    <i class="mdi mdi-pencil"></i>
+                                </button>
+                                <button type="button" ccid="{{ cc.id }}" class="btn btn-danger waves-effect waves-light ml-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete">
+                                    <i class="mdi mdi-delete"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="alert alert-info">There are no credit cards related with your account</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <button id="btnCreditCardAdd" type="button" class="btn btn-success waves-effect waves-light btn-animation mt-3" data-animation="zoomIn" data-toggle="modal" data-target="#creditCardModal">
+                    <i class="mdi mdi-plus"></i> Add Credit Card
+                </button>
+            </div>
+
+            <!-- Template Message -->
+            <div class="tab-pane" id="tab_activity" role="tabpanel">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%">Date</th>
+                            <th style="width: 25%">Plan</th>
+                            <th style="width: 25%">Amount</th>
+                            <th style="width: 25%">Messages</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for payment in myuser.get_my_payments %}
+                        <tr>
+                            <td>{{ payment.created_at|date:'Y-m-d' }}</td>
+                            <td>{{ payment.plan.name }}</td>
+                            <td>{{ payment.amount }}</td>
+                            <td>{{ payment.plan.messages|floatformat:0 }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="creditCardModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Credit Card</h5>
+                <button type="button" class="close myclose" data-dismiss="modal" aria-label="Close">
+                    <i class="mdi mdi-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="creditCardForm" action="" autocomplete="off">
+                    <input type="hidden" id="formAction" name="action" value="add"/>
+                    <input type="hidden" id="ccID" name="ccID" value=""/>
+
+                    <div class="form-group row">
+                        <label for="grades" class="col-md-3 col-form-label">Card Type</label>
+                        <div class="col-md-9">
+                            <select class="select2 form-control mb-3 custom-select" name="card_types" id="card_types">
+                                <option value="1">VISA</option>
+                                <option value="2">MASTERCARD</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="first_name" class="col-md-3 col-form-label">Card #</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" id="card_number" name="card_number"/>
+                        </div>
+                    </div>
+
+                    <div class="form-group text-right">
+                        <button type="button" class="btn btn-primary waves-effect waves-light" id="confirmCreditCard">
+                            <i class="mdi mdi-check"></i> Confirm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <script>
+        $(function () {
+
+        });
+    </script>
+{% endblock %}

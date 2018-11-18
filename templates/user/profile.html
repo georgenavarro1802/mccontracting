@@ -1,0 +1,106 @@
+{% extends 'base_profile.html' %}
+
+{% load static %}
+
+{% block canvas_profile %}
+
+    <h3 class="mt-0 text-center">
+        Profile
+    </h3>
+    <p class="text-muted font-14 text-center">
+        Add information about yourself to share on your profile.
+    </p>
+    <hr/>
+
+    <div class="form-field-container">
+
+        <form id="formProfile" role="form" action="" autocomplete="off">
+
+            <div class="form-group">
+                <input type="text" class="form-control lh-2" name="first_name" id="first_name" placeholder="First Name" value="{{ myuser.user.first_name }}" required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control lh-2" name="last_name" id="last_name" placeholder="Last Name" value="{{ myuser.user.last_name }}" required>
+            </div>
+
+            <div class="form-group">
+                <input type="email" class="form-control lh-2" name="email" id="email" placeholder="Email" value="{{ myuser.user.email }}" required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control lh-2" name="phone" id="phone" placeholder="Phone" value="{{ myuser.phone }}" required data-mask="(999) 999-9999">
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control lh-2" name="company_name" id="company_name" placeholder="Company Name" value="{{ myuser.company.name }}" required>
+            </div>
+
+            <button type="button" class="btn btn-success" id="btnProfile">
+                <i class="mdi mdi-check"></i> Save
+            </button>
+        </form>
+
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    <!-- Bootstrap inputmask js -->
+    <script src="{% static 'plugins/bootstrap-inputmask/bootstrap-inputmask.min.js' %}" type="text/javascript"></script>
+
+    <script>
+        $(function () {
+
+            $("#btnProfile").click(function () {
+                var form = $('#formProfile');
+
+                // get data
+                var data = form.serializeArray();
+
+                var user_first_name = $("#first_name").val();
+                var user_last_name = $("#last_name").val();
+                var user_email = $("#email").val();
+                var user_phone = $("#phone").val();
+                var user_company_name = $("#company_name").val();
+                var error = false;
+
+                if(!user_first_name){error = "Please enter a firstname";}
+                if(!user_last_name){error = "Please enter a lastname";}
+                if(!user_email){error = "Please enter an email";}
+                if(!user_phone){error = "Please enter a phone number";}
+                if(!user_company_name){error = "Please enter a company name";}
+
+                if(error){
+                    alert(error);
+                }else{
+                    $.ajax({
+                        method: "POST",
+                        url: "{% url 'user_profile' %}",
+                        data: data,
+                        success: function (response) {
+                            if (response.result === "ok") {
+                                swal({
+                                    title: 'Good Job!',
+                                    text: response.message,
+                                    type: 'success'
+                                }).then(function () {
+                                    location.reload();
+                                });
+                            }else{
+                                swal({
+                                    title: 'Oops',
+                                    text: response.message,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    })
+                }
+            });
+        });
+
+    </script>
+
+{% endblock %}

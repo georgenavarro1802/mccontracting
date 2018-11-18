@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block heading %}
+
+    <!-- C3 charts css -->
+    <link href="{% static 'plugins/c3/c3.min.css' %}" rel="stylesheet" type="text/css"  />
+
+{% endblock %}
+
+{% block canvas %}
+
+    <div class="row">
+        <!-- Column -->
+        <div class="col-md-6 col-lg-6 col-xl-3">
+            <div class="card m-b-30">
+                <div class="card-body">
+                    <div class="d-flex flex-row">
+                        <div class="col-3 align-self-center">
+                            <div class="round">
+                                <i class="mdi mdi-briefcase-check"></i>
+                            </div>
+                        </div>
+                        <div class="col-6 align-self-center text-center">
+                            <div>
+                                <h5 class="mt-0 round-inner">
+                                    {{ works_count|floatformat:0 }}
+                                </h5>
+                                <p class="mb-0 text-muted">Works</p>
+                            </div>
+                        </div>
+                        {#                        <div class="col-3 align-self-end align-self-center">#}
+                        {#                            <h6 class="m-0 float-right text-center text-primary">#}
+                        {#                                <span>100%</span>#}
+                        {#                            </h6>#}
+                        {#                        </div>#}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Column -->
+
+        <!-- Column -->
+        <div class="col-md-6 col-lg-6 col-xl-3">
+            <div class="card m-b-30">
+                <div class="card-body">
+                    <div class="d-flex flex-row">
+                        <div class="col-3 align-self-center">
+                            <div class="round">
+                                <i class="mdi mdi-view-list"></i>
+                            </div>
+                        </div>
+                        <div class="col-6 text-center align-self-center">
+                            <div>
+                                <h5 class="mt-0 round-inner">
+                                    {{ tasks_count|floatformat:0 }}
+                                </h5>
+                                <p class="mb-0 text-muted">Tasks</p>
+                            </div>
+                        </div>
+                        {#                        <div class="col-3 align-self-end align-self-center">#}
+                        {#                            <h6 class="m-0 float-right text-center text-primary">#}
+                        {#                                <span>{{ myuser.get_percentage_messages_sent|floatformat:0 }}%</span>#}
+                        {#                            </h6>#}
+                        {#                        </div>#}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Column -->
+
+        <!-- Column -->
+        <div class="col-md-6 col-lg-6 col-xl-3">
+            <div class="card m-b-30">
+                <div class="card-body">
+                    <div class="d-flex flex-row">
+                        <div class="col-3 align-self-center">
+                            <div class="round ">
+                                <i class="mdi mdi-briefcase"></i>
+                            </div>
+                        </div>
+                        <div class="col-6 align-self-center text-center">
+                            <div>
+                                <h5 class="mt-0 round-inner">
+                                    {{ projects_count|floatformat:0 }}
+                                </h5>
+                                <p class="mb-0 text-muted">Projects</p>
+                            </div>
+                        </div>
+                        {#                        <div class="col-3 align-self-end align-self-center">#}
+                        {#                            <h6 class="m-0 float-right text-center text-primary">#}
+                        {#                                <span>{{ myuser.get_percentage_messages_remaining|floatformat:0 }}%</span>#}
+                        {#                            </h6>#}
+                        {#                        </div>#}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Column -->
+
+        <!-- Column -->
+        <div class="col-md-6 col-lg-6 col-xl-3">
+            <div class="card m-b-30">
+                <div class="card-body">
+                    <div class="d-flex flex-row">
+                        <div class="col-3 align-self-center">
+                            <div class="round">
+                                <i class="mdi mdi-clipboard-account"></i>
+                            </div>
+                        </div>
+                        <div class="col-6 align-self-center text-center">
+                            <div>
+                                <h5 class="mt-0 round-inner">
+                                    {{ customers_count|floatformat:0 }}
+                                </h5>
+                                <p class="mb-0 text-muted">Customers</p>
+                            </div>
+                        </div>
+                        {#                        <div class="col-3 align-self-end align-self-center">#}
+                        {#                            <h6 class="m-0 float-right text-center text-success">#}
+                        {#                                <i class="mdi mdi-arrow-up"></i> <span>2.35%</span>#}
+                        {#                            </h6>#}
+                        {#                        </div>#}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Column -->
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card m-b-30">
+                <div class="card-body">
+                    <h4 class="mt-0 header-title">Tasks Statutes</h4>
+                    {#                    <p class="text-muted m-b-30 font-14">Tasks status</p>#}
+                    <div id="tasks-pie-chart"></div>
+                </div>
+            </div>
+        </div> <!-- end col -->
+        <div class="col-lg-6">
+            <div class="card m-b-30">
+                <div class="card-body">
+                    <h4 class="mt-0 header-title">Evaluations</h4>
+                    {#                    <p class="text-muted m-b-30 font-14">Evaluations status</p>#}
+                    <div id="donut-chart"></div>
+                </div>
+            </div>
+        </div> <!-- end col -->
+    </div> <!-- end row -->
+
+    <div class="row">
+        <div class="col-9 align-self-center">
+            <div class="card bg-white m-b-30">
+                <div class="card-body new-user">
+                    <h5 class="header-title mb-4 mt-0">Last 5 Tasks</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th class="border-top-0" style="width:60px;">Member</th>
+                                <th class="border-top-0">Name</th>
+                                <th class="border-top-0">Country</th>
+                                <th class="border-top-0">Earnings</th>
+                                <th class="border-top-0">Sales</th>
+                                <th class="border-top-0">Reviews</th>
+                                <th class="border-top-0">Progress</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <img class="rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="user" width="40"> </td>
+                                <td>
+                                    <a href="javascript:void(0);">Ruby T. Curd</a>
+                                </td>
+                                <td>
+                                    <img src="{% static 'images/flags/us_flag.jpg' %}" alt="" style="width:30px">
+                                </td>
+                                <td>$100</td>
+                                <td>10</td>
+                                <td>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star-half text-warning"></i>
+                                    <i class="mdi mdi-star-outline text-warning"></i>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height:8px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" aria-valuenow="94" aria-valuemin="0" aria-valuemax="100" style="width: 94%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <img class="rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="user" width="40"> </td>
+                                <td>
+                                    <a href="javascript:void(0);">William A. Johnson</a>
+                                </td>
+                                <td>
+                                    <img src="{% static 'images/flags/french_flag.jpg' %}" alt="" style="width:30px">
+                                </td>
+                                <td>$490</td>
+                                <td>24</td>
+                                <td>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star-half text-warning"></i>
+                                    <i class="mdi mdi-star-outline text-warning"></i>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height:8px;">
+                                        <div class="progress-bar bg-success" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100" style="width: 38%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <img class="rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="user" width="40"> </td>
+                                <td>
+                                    <a href="javascript:void(0);">Bobby M. Gray</a>
+                                </td>
+                                <td>
+                                    <img src="{% static 'images/flags/spain_flag.jpg' %}" alt="" style="width:30px">
+                                </td>
+                                <td>$380</td>
+                                <td>19</td>
+                                <td>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star-half text-warning"></i>
+                                    <i class="mdi mdi-star-outline text-warning"></i>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height:8px;">
+                                        <div class="progress-bar bg-dark" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" style="width:65%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <img class="rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="user" width="40"> </td>
+                                <td>
+                                    <a href="javascript:void(0);">Robert N. Carlile</a>
+                                </td>
+                                <td>
+                                    <img src="{% static 'images/flags/russia_flag.jpg' %}" alt="" style="width:30px">
+                                </td>
+                                <td>$450</td>
+                                <td>30</td>
+                                <td>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star-half text-warning"></i>
+                                    <i class="mdi mdi-star-outline text-warning"></i>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height:8px;">
+                                        <div class="progress-bar bg-danger" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" style="width: 88%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <img class="rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="user" width="40"> </td>
+                                <td>
+                                    <a href="javascript:void(0);">Ruby T. Curd</a>
+                                </td>
+                                <td>
+                                    <img src="{% static 'images/flags/italy_flag.jpg' %}" alt="" style="width:30px">
+                                </td>
+                                <td>$500</td>
+                                <td>40</td>
+                                <td>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star text-warning"></i>
+                                    <i class="mdi mdi-star-half text-warning"></i>
+                                    <i class="mdi mdi-star-outline text-warning"></i>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height:8px;">
+                                        <div class="progress-bar l-blue" role="progressbar" aria-valuenow="17" aria-valuemin="0" aria-valuemax="100" style="width: 17%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-3">
+            <div class="card bg-white m-b-30">
+                <div class="card-body new-user">
+                        <h5 class="header-title mt-0 mb-4">New Customers</h5>
+                    <ul class="list-unstyled mb-0 pr-3" id="boxscroll2" tabindex="1" style="overflow: hidden; outline: none;">
+                        <li class="p-3">
+                            <div class="media">
+                                <div class="thumb float-left">
+{#                                    <a href="#">#}
+{#                                        <img class=" rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="">#}
+{#                                    </a>#}
+                                </div>
+                                <div class="media-body">
+                                    <p class="media-heading mb-0">Ruby T. Curd <i class="fa fa-circle text-success mr-1 pull-right"></i></p>
+                                    <small class="pull-right text-muted">Now</small>
+                                    <small class="text-muted">Newyork</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="p-3">
+                            <div class="media">
+                                <div class="thumb float-left">
+{#                                    <a href="#">#}
+{#                                        <img class=" rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="">#}
+{#                                    </a>#}
+                                </div>
+                                <div class="media-body">
+                                    <p class="media-heading mb-0">William A. Johnson <i class="fa fa-circle text-success mr-1 pull-right"></i></p>
+                                    <small class="pull-right text-muted">Now</small>
+                                    <small class="text-muted">California</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="p-3">
+                            <div class="media">
+                                <div class="thumb float-left">
+{#                                    <a href="#">#}
+{#                                        <img class=" rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="">#}
+{#                                    </a>#}
+                                </div>
+                                <div class="media-body">
+                                    <p class="media-heading mb-0">Robert N. Carlile<i class="fa fa-circle text-danger mr-1 pull-right"></i></p>
+                                    <small class="pull-right text-muted">10 min ago</small>
+                                    <small class="text-muted">India</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="p-3">
+                            <div class="media">
+                                <div class="thumb float-left">
+{#                                    <a href="#">#}
+{#                                        <img class=" rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="">#}
+{#                                    </a>#}
+                                </div>
+                                <div class="media-body">
+                                    <p class="media-heading mb-0">Bobby M. Gray <i class="fa fa-circle text-success mr-1 pull-right"></i></p>
+                                    <small class="pull-right text-muted">Now</small>
+                                    <small class="text-muted">Australia</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="p-3">
+                            <div class="media">
+                                <div class="thumb float-left">
+{#                                    <a href="#">#}
+{#                                        <img class=" rounded-circle" src="{% static 'images/avatar_circle.jpg' %}" alt="">#}
+{#                                    </a>#}
+                                </div>
+                                <div class="media-body">
+                                    <p class="media-heading mb-0">Ruby T. Curd <i class="fa fa-circle text-danger mr-1 pull-right"></i></p>
+                                    <small class="pull-right text-muted">36 min ago</small>
+                                    <small class="text-muted">New Zealand</small>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-white m-b-30">
+{#                <img src="{% static 'images/widgets/wather.jpg' %}" alt="" class="img-fluid">#}
+
+                <div class="card-body bg-primary">
+                    <div class="row">
+                        <div class="col-6  align-self-center">
+                            <div class="row">
+                                <div class="col-lg-6 col-sm-6 text-center">
+                                    <canvas id="partly-cloudy-day" width="70" height="70"></canvas>
+                                    <h6 class="text-white">SUNDAY <span>25<sup>th</sup></span></h6>
+                                </div>
+                                <div class="col-lg-6 col-sm-6 text-center align-self-center">
+                                    <h5 class="mt-0 text-white"><b>32°</b></h5>
+                                    <p class="text-white  font-12">Partly cloudy</p>
+                                    <p class="text-white font-12">15km/h - 37%</p>
+                                </div>
+                            </div><!-- End row -->
+                        </div>
+                        <div class="col-6 align-self-center">
+                            <div class="row">
+                                <div class="col-4 text-center">
+                                    <h6 class="text-white mt-0 font-14">MON</h6>
+                                    <canvas id="rain" width="28" height="35"></canvas>
+                                    <h6 class="text-white font-14">38°<i class="wi-degrees"></i></h6>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <h6 class="text-white mt-0 font-14">TUE</h6>
+                                    <canvas id="wind" width="35" height="35"></canvas>
+                                    <h6 class="text-white font-14">32°<i class="wi-degrees"></i></h6>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <h6 class="text-white mt-0 font-14">WED</h6>
+                                    <canvas id="snow" width="35" height="35"></canvas>
+                                    <h6 class="text-white font-14">30°<i class="wi-degrees"></i></h6>
+                                </div>
+                            </div><!-- end row -->
+                        </div>
+                    </div><!-- end row -->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <!--C3 Chart-->
+    <script src="{% static 'plugins/d3/d3.min.js' %}"></script>
+    <script src="{% static 'plugins/c3/c3.min.js' %}"></script>
+    <script src="{% static 'js/pages/c3-chart-init.js' %}"></script>
+    <script src="{% static 'js/pages/dashboard.js' %}"></script>
+
+    <script>
+             /* BEGIN SVG WEATHER ICON */
+         if (typeof Skycons !== 'undefined'){
+            var icons = new Skycons({"color": "#fff"},
+                                    {"resizeClear": true}),
+                list  = ["clear-day", "clear-night", "partly-cloudy-day", "partly-cloudy-night",
+                         "cloudy", "rain", "sleet", "snow", "wind", "fog"], i;
+
+            for(i = list.length; i--; )
+                icons.set(list[i], list[i]);
+                icons.play();
+        }
+
+    </script>
+
+{% endblock %}
+
