@@ -6,7 +6,7 @@ from django.db.models import Avg
 
 from mccontracting.values import (GENDERS, USERS_GROUPS, STATUSES, STATUS_NEW_ID, EVALUATION_TYPES,
                                   STATUS_COMPLETED_ID, USERS_GROUP_EMPLOYEES, EVALUATION_TYPE_EXCELLENT,
-                                  STATUS_PROGRESS_ID)
+                                  STATUS_PROGRESS_ID, GENDER_FEMALE_ID)
 
 
 class Company(models.Model):
@@ -68,6 +68,9 @@ class Users(models.Model):
         db_table = 'users'
         unique_together = ('user', )
         ordering = ('user', )
+
+    def is_female(self):
+        return self.gender == GENDER_FEMALE_ID
 
     def get_my_company(self):
         if self.usercompany_set.exists():

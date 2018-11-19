@@ -119,7 +119,7 @@
 {#                            <div class="circle" title="" data-original-title="{{ myuser.complete_name }}">#}
 {#                                {{ myuser.get_my_name_initials }}#}
 {#                            </div>#}
-                            <img src="{% static 'images/users/avatar-f.png' %}" alt="user" class="rounded-circle">
+                            <img src="{% if myuser.is_female %}{% static 'images/users/avatar-f.png' %}{% else %}{% static 'images/users/avatar-m.png' %}{% endif %}" alt="user" class="rounded-circle">
                         </a>
                         <div class="dropdown-menu dropdown-menu-right profile-dropdown ">
                             <!-- item-->
