@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
-from app import views, projects, customers, work_types, employees, works, tasks
+from app import views, projects, customers, work_types, employees, works, tasks, users
 
 from mccontracting.settings import STATIC_URL, STATIC_ROOT, MEDIA_URL, MEDIA_ROOT
 
@@ -60,13 +60,13 @@ urlpatterns = [
 
 
     # User Settings
-    # url(r'^user/profile/', users.profile, name='user_profile'),
-    # url(r'^user/photo/', users.photo, name='user_photo'),
-    # url(r'^user/links/', users.links, name='user_links'),
-    # url(r'^user/account/', users.account, name='user_account'),
-    # url(r'^user/plans/', users.plans, name='user_plans'),
-    # url(r'^user/billing/', users.billing, name='user_billing'),
-    # url(r'^user/notifications/', users.notifications, name='user_notifications'),
+    url(r'^user/profile/', users.profile, name='user_profile'),
+    url(r'^user/photo/', users.photo, name='user_photo'),
+    url(r'^user/links/', users.links, name='user_links'),
+    url(r'^user/account/', users.account, name='user_account'),
+    url(r'^user/plans/', users.plans, name='user_plans'),
+    url(r'^user/billing/', users.billing, name='user_billing'),
+    url(r'^user/notifications/', users.notifications, name='user_notifications'),
 
 ]
 

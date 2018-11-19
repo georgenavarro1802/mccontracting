@@ -20,7 +20,15 @@
                 <div class="card-body">
 
                     <div class="text-center">
-                        <img src="{{ myuser.download_avatar }}" alt="" class="rounded-circle img-thumbnail w-75">
+                        {% if myuser.download_avatar %}
+                            <img src="{{ myuser.download_avatar }}" alt="" class="rounded-circle img-thumbnail w-75">
+                        {% else %}
+                            {% if myuser.is_female %}
+                                <img src="{% static 'images/users/avatar-f.png' %}" alt="user_female" class="rounded-circle">
+                            {% else %}
+                                <img src="{% static 'images/users/avatar-m.png' %}" alt="user_female" class="rounded-circle">
+                            {% endif %}
+                        {% endif %}
                         <h4 class="font-18">{{ myuser.complete_name }}</h4>
                         <a href="" class="text-muted font-12">{{ myuser.user.email }}</a>
 
